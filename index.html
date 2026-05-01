@@ -38,7 +38,10 @@
 </head>
 <body>
 <div class="container">
-    <div class="header"><h1><i class="fas fa-prescription-bottle"></i> حاسبة جرعات الشرابات</h1><p>نظام دقيق - حسب مرجع فارماكون | جرعة مباشرة (مل/كجم)</p></div>
+    <div class="header">
+        <h1><i class="fas fa-prescription-bottle"></i> حاسبة جرعات الشرابات</h1>
+        <p>نظام دقيق  | جرعة مباشرة (مل/كجم)</p>
+    </div>
     <div class="card">
         <h2><i class="fas fa-search"></i> اختيار الدواء والوزن</h2>
         <div class="custom-select-area">
@@ -55,18 +58,24 @@
     </div>
     <div class="card">
         <h2><i class="fas fa-chart-line"></i> الجرعة الموصى بها</h2>
-        <div class="result-value"><div class="dose-ml" id="finalMl">--- مل</div><div id="finalMgEquivalent" style="margin-top:8px;">--- مجم لكل جرعة</div></div>
+        <div class="result-value">
+            <div class="dose-ml" id="finalMl">--- مل</div>
+            <div id="finalMgEquivalent" style="margin-top:8px;">--- مجم لكل جرعة</div>
+        </div>
         <div id="detailsContainer">
-            <div class="info-line"><span>💊 الدواء:</span> <strong id="drugNameDisplay">---</strong></div>
+            <div class="info-line"><span>💊 الدواء:</span> <strong id="drugNameDisplay">لم يتم اختيار دواء</strong></div>
             <div class="info-line"><span>🧪 التركيز:</span> <span id="concDisplay">---</span></div>
             <div class="info-line"><span>⚕️ عدد المرات:</span> <span id="freqDisplay">---</span></div>
             <div class="info-line"><span>📌 ملاحظة العلاج:</span> <span id="noteDisplay">---</span></div>
         </div>
-        <div id="warningBox" class="warning-note"><i class="fas fa-shield-alt"></i> <span id="warningText">🔍 يرجى اختيار الدواء وإدخال الوزن ثم الضغط على احسب</span></div>
+        <div id="warningBox" class="warning-note">
+            <i class="fas fa-shield-alt"></i> <span id="warningText">🔍 يرجى اختيار الدواء وإدخال الوزن ثم الضغط على احسب</span>
+        </div>
         <button id="printBtn" class="btn-print"><i class="fas fa-print"></i> طباعة ملصق الصيدلية</button>
     </div>
     <footer>الصيدلاني : مصطفى عبد الزهرة هاشم</footer>
 </div>
+
 <script>
     const drugsDatabase = [
         { name: "Amoxicillin 125mg/5ml", category: "البنسلينات", factor_ml_kg: 0.5, frequency: "3 مرات يومياً", note: "يؤخذ بدون ارتباط بالطعام.", concentration: "125 مجم / 5 مل" },
@@ -92,56 +101,90 @@
         const filtered = drugsDatabase.filter(d => d.name.toLowerCase().includes(filterText.toLowerCase()));
         const grouped = {};
         filtered.forEach(d => { if(!grouped[d.category]) grouped[d.category] = []; grouped[d.category].push(d); });
+        
         drugListDiv.innerHTML = "";
         for(const [cat, items] of Object.entries(grouped)) {
-            const catDiv = document.createElement("div"); catDiv.className = "drug-category"; catDiv.innerText = cat; drugListDiv.appendChild(catDiv);
+            const catDiv = document.createElement("div"); 
+            catDiv.className = "drug-category"; 
+            catDiv.innerText = cat; 
+            drugListDiv.appendChild(catDiv);
+            
             items.forEach(drug => {
-                const opt = document.createElement("div"); opt.className = "drug-option"; opt.innerText = drug.name;
-                opt.onclick = () => { currentDrug = drug; searchInput.value = drug.name; drugListDiv.classList.remove("show"); };
+                const opt = document.createElement("div"); 
+                opt.className = "drug-option"; 
+                opt.innerText = drug.name;
+                opt.onclick = () => { 
+                    currentDrug = drug; 
+                    searchInput.value = drug.name; 
+                    drugListDiv.classList.remove("show"); 
+                };
                 drugListDiv.appendChild(opt);
             });
         }
-        if(filtered.length === 0) { const noData = document.createElement("div"); noData.className = "drug-option"; noData.innerText = "❌ لا يوجد دواء"; drugListDiv.appendChild(noData); }
+        if(filtered.length === 0) { 
+            const noData = document.createElement("div"); 
+            noData.className = "drug-option"; 
+            noData.innerText = "❌ لا يوجد دواء بهذا الاسم"; 
+            drugListDiv.appendChild(noData); 
+        }
     }
 
-    searchInput.addEventListener("input", (e) => { buildDrugList(e.target.value); drugListDiv.classList.add("show"); });
-    searchInput.addEventListener("focus", () => { buildDrugList(searchInput.value); drugListDiv.classList.add("show"); });
-    document.addEventListener("click", (e) => { if(!searchInput.contains(e.target) && !drugListDiv.contains(e.target)) drugListDiv.classList.remove("show"); });
+    searchInput.addEventListener("input", (e) => { 
+        if(e.target.value === "") currentDrug = null;
+        buildDrugList(e.target.value); 
+        drugListDiv.classList.add("show"); 
+    });
+
+    searchInput.addEventListener("focus", () => { 
+        buildDrugList(searchInput.value); 
+        drugListDiv.classList.add("show"); 
+    });
+
+    document.addEventListener("click", (e) => { 
+        if(!searchInput.contains(e.target) && !drugListDiv.contains(e.target)) 
+            drugListDiv.classList.remove("show"); 
+    });
 
     function calcWeightFromAge() {
         let y = parseFloat(document.getElementById('ageY').value);
         let m = parseFloat(document.getElementById('ageM').value);
         let w = document.getElementById('weight');
-        if(!isNaN(y) && y > 0) { w.value = (y*2)+8; document.getElementById('ageM').value = ""; }
-        else if(!isNaN(m) && m > 0) { w.value = (m+9)/2; document.getElementById('ageY').value = ""; }
+        if(!isNaN(y) && y > 0) { 
+            w.value = (y*2)+8; 
+            document.getElementById('ageM').value = ""; 
+        }
+        else if(!isNaN(m) && m > 0) { 
+            w.value = (m+9)/2; 
+            document.getElementById('ageY').value = ""; 
+        }
     }
     document.getElementById('ageY').addEventListener('input', calcWeightFromAge);
     document.getElementById('ageM').addEventListener('input', calcWeightFromAge);
 
     function calculateDose() {
         let weight = parseFloat(document.getElementById('weight').value);
+        if(!currentDrug) { alert("يرجى اختيار الدواء من القائمة أولاً"); return; }
         if(isNaN(weight) || weight <= 0) { alert("أدخل وزناً صحيحاً"); return; }
-        if(!currentDrug) { alert("اختر دواءً أولاً"); return; }
+        
         let doseMl = Math.round((weight * currentDrug.factor_ml_kg) * 10) / 10;
         let concMatch = currentDrug.concentration.match(/(\d+)\s*مجم/);
         let mgPerDose = concMatch ? Math.round((doseMl * (parseFloat(concMatch[1])/5)) * 10)/10 : 0;
+        
         document.getElementById('finalMl').innerHTML = doseMl.toFixed(1) + " مل";
         document.getElementById('finalMgEquivalent').innerHTML = `≈ ${mgPerDose.toFixed(1)} مجم لكل جرعة`;
         document.getElementById('drugNameDisplay').innerHTML = currentDrug.name;
         document.getElementById('concDisplay').innerHTML = currentDrug.concentration;
         document.getElementById('freqDisplay').innerHTML = currentDrug.frequency;
         document.getElementById('noteDisplay').innerHTML = currentDrug.note;
-        document.getElementById('warningText').innerHTML = currentDrug.note + " | يمكن تقليل الجرعة بمقدار 0.5-1 مل للجرعة الآمنة";
+        document.getElementById('warningText').innerHTML = currentDrug.note + " | يرجى مراجعة الصيدلاني للتأكد.";
     }
     document.getElementById('calcBtn').addEventListener('click', calculateDose);
 
     function printLabel() {
-        if(!currentDrug) { alert("اختر دواءً أولاً"); return; }
+        if(!currentDrug || !document.getElementById('weight').value) { alert("احسب الجرعة أولاً قبل الطباعة"); return; }
         let weight = parseFloat(document.getElementById('weight').value);
-        if(isNaN(weight) || weight <= 0) { alert("أدخل وزناً صحيحاً"); return; }
         let doseMl = Math.round((weight * currentDrug.factor_ml_kg) * 10) / 10;
-        let concMatch = currentDrug.concentration.match(/(\d+)\s*مجم/);
-        let mgValue = concMatch ? Math.round((doseMl * (parseFloat(concMatch[1])/5)) * 10)/10 : 0;
+        
         let win = window.open('', '', 'width=450,height=450');
         win.document.write(`
             <html dir="rtl"><head><style>
@@ -154,26 +197,23 @@
                 <div class="drug-name">${currentDrug.name}</div>
                 <div class="dose-big">${doseMl.toFixed(1)} مل</div>
                 <div>${currentDrug.frequency}</div>
-                <div>${mgValue.toFixed(1)} مجم لكل جرعة</div>
                 <div class="footer-sign">الصيدلاني : مصطفى عبد الزهرة هاشم</div>
             </body></html>
         `);
         win.document.close();
+        win.focus();
     }
     document.getElementById('printBtn').addEventListener('click', printLabel);
 
-    // ========== التهيئة النهائية (حقل البحث فارغ تماماً) ==========
-    buildDrugList("");
-    currentDrug = null;
-    searchInput.value = "";
-    searchInput.setAttribute("autocomplete", "off");
-    document.getElementById('finalMl').innerHTML = "--- مل";
-    document.getElementById('finalMgEquivalent').innerHTML = "--- مجم لكل جرعة";
-    document.getElementById('drugNameDisplay').innerHTML = "لم يتم اختيار دواء";
-    document.getElementById('concDisplay').innerHTML = "---";
-    document.getElementById('freqDisplay').innerHTML = "---";
-    document.getElementById('noteDisplay').innerHTML = "اختر دواء من القائمة أعلاه أولاً";
-    document.getElementById('warningText').innerHTML = "🔍 يرجى اختيار الدواء وإدخال الوزن ثم الضغط على احسب";
+    // ========== التصفير عند تحميل الصفحة لمنع الاختيار التلقائي ==========
+    window.onload = function() {
+        currentDrug = null;
+        searchInput.value = "";
+        document.getElementById('weight').value = "";
+        document.getElementById('ageY').value = "";
+        document.getElementById('ageM').value = "";
+        buildDrugList("");
+    };
 </script>
 </body>
 </html>
