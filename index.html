@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الصيدلاني مصطفى عبد الزهرة هاشم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); min-height: 100vh; padding: 15px; color: #1e293b; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .card { background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 25px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .grid-2col { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+        .select-container { position: relative; width: 100%; }
+        #drugSelect { display: none; position: absolute; z-index: 1000; background: white; width: 100%; max-height: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 2px solid #0ea5e9; border-radius: 0 0 15px 15px; overflow-y: auto; }
+        #drugSelect.show { display: block; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #cbd5e1; border-radius: 15px; font-family: 'Tajawal'; font-size: 1.1rem; outline: none; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-calc { background: linear-gradient(95deg, #0284c7, #0ea5e9); border: none; padding: 18px; color: white; border-radius: 50px; cursor: pointer; font-weight: 800; font-size: 1.3rem; width: 100%; margin-top: 15px; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); transition: 0.3s; }
+        .btn-print { background: linear-gradient(95deg, #059669, #10b981); border: none; padding: 15px; color: white; border-radius: 50px; cursor: pointer; font-weight: 800; font-size: 1.1rem; width: 100%; margin-top: 10px; display: none; }
+        .dose-value { font-size: 3.5rem; font-weight: 900; color: #0369a1; text-align: center; margin: 15px 0; background: #e0f2fe; padding: 15px; border-radius: 20px; border: 3px dashed #0ea5e9; }
+        .info-row { margin-bottom: 12px; font-size: 1.2rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; }
+        .note-container { margin-top: 15px; padding: 15px; background: #fff9db; border-radius: 15px; border: 1px solid #fde68a; text-align: right; }
+        footer { text-align: center; margin-top: 20px; padding: 15px; border-radius: 20px; background: #0c4a6e; color: white; font-weight: 700; font-size: 1.1rem; }
+        @media (max-width: 850px) { .grid-2col { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="grid-2col">
+        <div class="card">
+            <h2><i class="fas fa-flask"></i>  حساب جرع الشرابات </h2>
+            <div class="select-container" id="mainContainer">
+                <input type="text" id="searchDrug" placeholder="ابحث بالاسم العلمي والتركيز..." onfocus="toggleList(true)" oninput="filterDrugs()" autocomplete="off">
+                <select id="drugSelect" size="10" onchange="confirmSelection()">
+                    <optgroup label="مجموعة البنسلينات (Penicillins)">
+                        <option value="0.5" data-fr="3" data-dur="7-10 أيام" data-n="يُرج جيداً ويحفظ في الثلاجة (صلاحية 14 يوم).">Amoxicillin 125mg/5ml</option>
+                        <option value="0.25" data-fr="3" data-dur="7-10 أيام" data-n="يُرج جيداً ويحفظ في الثلاجة (صلاحية 14 يوم).">Amoxicillin 250mg/5ml</option>
+                        <option value="0.4" data-fr="3" data-dur="7-10 أيام" data-n="قبل الأكل بساعة (على معدة فارغة).">Ampicillin 125mg/5ml</option>
+                        <option value="0.25" data-fr="3" data-dur="7 أيام" data-n="يُؤخذ عند بداية الوجبة لتقليل اضطراب المعدة.">Co-amoxiclav 156.25mg/5ml</option>
+                        <option value="0.15" data-fr="3" data-dur="7 أيام" data-n="يُرج جيداً ويحفظ في الثلاجة.">Co-amoxiclav 312.5mg/5ml</option>
+                        <option value="0.2" data-fr="2" data-dur="7 أيام" data-n="كل 12 ساعة مع الطعام.">Co-amoxiclav 457mg/5ml</option>
+                    </optgroup>
+                    <optgroup label="مجموعة السيفالوسبورينات (Cephalosporins)">
+                        <option value="0.5" data-fr="3" data-dur="7 أيام" data-n="يُرج جيداً ويحفظ في الثلاجة بعد الحل.">Cephalexin 125mg/5ml</option>
+                        <option value="0.25" data-fr="3" data-dur="7 أيام" data-n="يُرج جيداً ويحفظ في الثلاجة.">Cephalexin 250mg/5ml</option>
+                        <option value="0.4" data-fr="3" data-dur="7 أيام" data-n="يُرج جيداً قبل كل جرعة.">Cefaclor 125mg/5ml</option>
+                        <option value="0.2" data-fr="3" data-dur="7 أيام" data-n="يمكن تناوله مع أو بدون طعام.">Cefadroxil 250mg/5ml</option>
+                        <option value="0.5" data-fr="2" data-dur="7-10 أيام" data-n="يُفضل تناوله مع الطعام لزيادة الامتصاص.">Cefuroxime 125mg/5ml</option>
+                        <option value="0.4" data-fr="1" data-dur="5 أيام" data-n="مرة واحدة يومياً. يُرج جيداً.">Cefixime 100mg/5ml</option>
+                        <option value="0.56" data-fr="1" data-dur="7 أيام" data-n="يُفصل عن مكملات الحديد والكالسيوم بساعتين.">Cefdinir 125mg/5ml</option>
+                    </optgroup>
+                    <optgroup label="المضادات الحيوية الأخرى">
+                        <option value="0.25" data-fr="1" data-dur="3-5 أيام" data-n="قبل الأكل بساعة أو بعده بساعتين.">Azithromycin 200mg/5ml</option>
+                        <option value="0.5" data-fr="2" data-dur="7 أيام" data-n="يُرج جيداً ويؤخذ كل 12 ساعة.">Clarithromycin 125mg/5ml</option>
+                        <option value="0.4" data-fr="3" data-dur="5-7 أيام" data-n="مع الطعام لتقليل اضطراب المعدة.">Metronidazole 125mg/5ml</option>
+                    </optgroup>
+                    <optgroup label="السوائل والأدوية العامة">
+                        <option value="0.6" data-fr="4" data-dur="عند اللزوم" data-n="كل 6 ساعات عند ارتفاع درجة الحرارة.">Paracetamol 120mg/5ml</option>
+                        <option value="0.3" data-fr="4" data-dur="عند اللزوم" data-n="كل 6 ساعات عند ارتفاع درجة الحرارة.">Paracetamol 250mg/5ml</option>
+                        <option value="0.5" data-fr="3" data-dur="عند اللزوم" data-n="يُؤخذ دائماً بعد الطعام.">Ibuprofen 100mg/5ml</option>
+                        <option value="0.15" data-fr="3" data-dur="عند اللزوم" data-n="قطرات فموية مسكنة للألم.">Diclofenac 15mg/ml (Drops)</option>
+                        <option value="0.2" data-fr="1" data-dur="عند الحاجة" data-n="مضاد حساسية لا يسبب النعاس.">Desloratadine 0.5mg/ml</option>
+                        <option value="0.33" data-fr="1" data-dur="3-5 أيام" data-n="يُؤخذ صباحاً بعد الطعام مباشرة.">Prednisolone 15mg/5ml</option>
+                        <option value="1.0" data-fr="1" data-dur="مرة واحدة" data-n="تكرر الجرعة بعد أسبوعين بالضبط.">Mebendazole 100mg/5ml</option>
+                        <option value="2.0" data-fr="1" data-dur="لحين التحسن" data-n="ملين يُؤخذ مرة واحدة يومياً.">Lactulose 3.35g/5ml</option>
+                        <option value="0.25" data-fr="2" data-dur="عند التقيؤ" data-n="قبل الطعام بنصف ساعة.">Ondansetron 4mg/5ml</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="row-3">
+                <div><label>سنة</label><input type="number" id="ageY" oninput="calcW('y')"></div>
+                <div><label>شهر</label><input type="number" id="ageM" oninput="calcW('m')"></div>
+                <div><label>وزن (كجم)</label><input type="number" id="weight" step="0.1"></div>
+            </div>
+            <button class="btn-calc" onclick="calculate()">احسب الجرعة العلمية</button>
+        </div>
+        <div class="card">
+            <h2 style="text-align:center;">تفاصيل الاستخدام</h2>
+            <div class="dose-value" id="resMl">0.0 مل</div>
+            <div class="info-row"><span>الوزن المحسوب:</span> <span id="resW">---</span></div>
+            <div class="info-row"><span>التكرار اليومي:</span> <span id="resF">---</span></div>
+            <div id="noteBox" class="note-container" style="display:none;">
+                <p><strong>مدة العلاج:</strong> <span id="resD"></span></p>
+                <p style="color:#b45309; margin-top:8px;"><strong><i class="fas fa-info-circle"></i> ملاحظات الصيدلاني:</strong> <span id="resN"></span></p>
+            </div>
+            <button id="pBtn" class="btn-print" onclick="printL()"><i class="fas fa-print"></i> طباعة ملصق الدواء</button>
+            <footer>الصيدلاني مصطفى عبد الزهرة هاشم</footer>
+        </div>
+    </div>
+</div>
+<script>
+    const drugS = document.getElementById('drugSelect');
+    const searchI = document.getElementById('searchDrug');
+    function toggleList(s) { s ? drugS.classList.add('show') : drugS.classList.remove('show'); }
+    function filterDrugs() {
+        toggleList(true); let v = searchI.value.toLowerCase();
+        for(let o of drugS.options) o.style.display = o.text.toLowerCase().includes(v) ? "" : "none";
+    }
+    function confirmSelection() { if(drugS.selectedIndex !== -1) { searchI.value = drugS.options[drugS.selectedIndex].text; toggleList(false); } }
+    function calcW(t) {
+        let y=document.getElementById('ageY'), m=document.getElementById('ageM'), w=document.getElementById('weight');
+        if(t==='y' && y.value) { w.value = (parseFloat(y.value)*2)+8; m.value = ''; }
+        else if(t==='m' && m.value) { w.value = (parseFloat(m.value)+9)/2; y.value = ''; }
+    }
+    function calculate() {
+        let o = drugS.options[drugS.selectedIndex], w = parseFloat(document.getElementById('weight').value);
+        if(!o || !w) return alert("يرجى اختيار الدواء وتحديد الوزن");
+        document.getElementById('resMl').innerText = (w * parseFloat(o.value)).toFixed(1) + " مل";
+        document.getElementById('resW').innerText = w + " كجم";
+        document.getElementById('resF').innerText = o.getAttribute('data-fr') + " مرات يومياً";
+        document.getElementById('resD').innerText = o.getAttribute('data-dur');
+        document.getElementById('resN').innerText = o.getAttribute('data-n');
+        document.getElementById('noteBox').style.display = "block";
+        document.getElementById('pBtn').style.display = "block";
+    }
+    function printL() {
+        const p = window.open('', '', 'width=400,height=400');
+        p.document.write(`
+            <html dir="rtl"><head><style>
+                @page { size: 50mm 40mm; margin: 0; }
+                body { font-family: 'Arial'; padding: 10px; text-align: center; }
+                .d { font-size: 13px; font-weight: bold; border-bottom: 1.5px solid #000; padding-bottom: 3px; }
+                .v { font-size: 32px; font-weight: 900; margin: 6px 0; }
+                .f { font-size: 17px; font-weight: bold; }
+                .footer { font-size: 10px; border-top: 1px dashed #000; margin-top: 8px; padding-top: 4px; }
+            </style></head><body onload="window.print();window.close()">
+                <div class="d">${searchI.value}</div>
+                <div class="v">${document.getElementById('resMl').innerText}</div>
+                <div class="f">${document.getElementById('resF').innerText}</div>
+                <div class="footer">الصيدلاني مصطفى عبد الزهرة هاشم</div>
+            </body></html>`);
+        p.document.close();
+    }
+    document.addEventListener('click', (e) => { if(!document.getElementById('mainContainer').contains(e.target)) toggleList(false); });
+</script>
+</body>
+</html>
